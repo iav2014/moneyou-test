@@ -29,8 +29,11 @@ and performs a email to user, using nodemailer.
 you can launch to many consumers if you need best perfomance.
 Rabbitmq send messages them using a round robin pattern
 this process notify to server process ones operating has been done (ack).
+
 Nodemailer
+
 you must put your node mailer account:
+
 var transporter = nodemailer.createTransport({
 		host: 'mail.xxx.com',
 		port: 465,
@@ -52,6 +55,7 @@ all api works in https mode.
 server & subscriber & rabbitmq talk message with encrypt streams.
 mongodb email collection saved encrypt document:
 like this:
+
 {
     "_id" : ObjectId("5bc0c95c79f9679c13a69779"),
     "email" : "ྐྞྗ྘ྚྐྖ࿗྘ྋྐྃ྘ྐྵྞྔ྘ྐྕ࿗ྚྖྔ",
