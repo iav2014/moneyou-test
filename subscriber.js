@@ -95,7 +95,6 @@ let insertOne = (data, callback) => {
 let sendEmail = (data, callback) => {
 	// sending email
 	var transporter = nodemailer.createTransport({
-		// example with google mail service
 		host: 'mail.xxx.com',
 		port: 465,
 		secure: true, // true for 465, false for other ports
@@ -105,7 +104,7 @@ let sendEmail = (data, callback) => {
 		}
 	});
 	var mailOptions = {
-		from: 'no-reply@interactionmobile.com',
+		from: 'no-reply@xxx.com',
 		to: encoder(data.email),
 		subject: 'send sms',
 		html: '<p> this is your msg:</p><h1>' + encoder(data.msg) + '</h1>'
