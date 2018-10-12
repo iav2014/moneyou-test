@@ -1,0 +1,27 @@
+{
+  "name": "moneyou",
+  "version": "1.0.0",
+  "description": "moneyou test",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iav2014/moneyou-test.git"
+  },
+  "author": "Nacho Ariza 12/10/2018",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iav2014/moneyou-test/issues"
+  },
+  "homepage": "https://github.com/iav2014/moneyou-test#readme",
+  "dependencies": {
+    "amqplib": "^0.5.2",
+    "express": "^4.16.4",
+    "mongodb": "^3.1.8",
+    "nodemailer": "^4.6.8",
+    "optimist": "^0.6.1"
+  }
+}
