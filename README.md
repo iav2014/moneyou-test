@@ -17,6 +17,7 @@ Server can handle 5000 to 25000 request/second depending your processor (i5 i7)
 2) publish 2 routes: /send % /recover
 3) put a user email & msg into a rabbitmq queue
 4) response with 200 or 500 http code
+
 [recover]
 1) reveive user email field
 2) find & recover data from mongodb email collection
