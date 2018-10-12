@@ -96,12 +96,12 @@ let sendEmail = (data, callback) => {
 	// sending email
 	var transporter = nodemailer.createTransport({
 		// example with google mail service
-		host: 'mail.interactionmobile.com',
+		host: 'mail.xxx.com',
 		port: 465,
 		secure: true, // true for 465, false for other ports
 		auth: {
-			user: 'no-reply@interactionmobile.com', // replace by your email to practice
-			pass: '7Iv0{&6NID@}' // replace by your-password
+			user: 'no-reply@xxx.com', // replace by your email to practice
+			pass: 'xxx' // replace by your-password
 		}
 	});
 	var mailOptions = {
