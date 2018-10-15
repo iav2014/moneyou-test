@@ -2,7 +2,8 @@ mone you example test
 
 this source code consist of a  server & subscribe pattern
 This code is for option-2 document of moneyou.
-Arquitecture
+
+Architecture
 
 api server -> rabbitmqn-> [subscribers	1..n] -> mongodb + nodemailer					
  
