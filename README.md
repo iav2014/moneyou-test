@@ -7,6 +7,9 @@ Architecture
 
 api server -> rabbitmqn-> [subscribers	1..n] -> mongodb + nodemailer					
  
+this architecture has been chosen based on queues, 
+since it allows horizontal growth and scaling by increasing the number of subscribers
+
 Requirements
 
 • Create an API to post a message which can be delivered to a recipient via
@@ -74,19 +77,31 @@ var transporter = nodemailer.createTransport({
 Scale up:
 You can scale up server, using:
 load balancer element -> point to a different server(s)
-https certificate will be installed on lbe redirecting to http server port.
-You can scale up server using kubernetes or aks8 (microsoft) with image docker
+then https certificate will be installed on lbe redirecting to http server port.
+You can scale up server using kubernetes or aks8 (microsoft) with image docker.
+Dockerfile is not present in this code review.
 
 Security:
-all api works in https mode.
-server & subscriber & rabbitmq talk message with encrypt streams.
+all api works in https mode and send data with post.
+
+It was relatively easy to add a temporary token in the request that would allow the operation
+to be performed in a user-defined time.
+
+server & subscriber & rabbitmq work with message with encrypt objects.
 mongodb email collection saved encrypt document:
-like this:
+It looks like this:
 
 {
     "_id" : ObjectId("5bc0c95c79f9679c13a69779"),
     "email" : "ྐྞྗ྘ྚྐྖ࿗྘ྋྐྃ྘ྐྵྞྔ྘ྐྕ࿗ྚྖྔ",
     "msg" : "ྑྜྕྕྖ࿙ྎྖྋྕྜྷ"
+}
+
+original object:
+{
+        "_id": "5bc0c95c79f9679c13a69779",
+        "email": "ignacio.ariza@gmail.com",
+        "msg": "hello world"
 }
 
 (c) Nacho Ariza - 12/10/2018
