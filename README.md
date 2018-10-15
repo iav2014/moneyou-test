@@ -47,13 +47,17 @@ Server can handle 5000 to 25000 request/second depending your processor (i5 i7) 
 [send]
 
 • read data from user & encrypt data object
+
 • put a user email & msg into a rabbitmq queue
+
 • response with 200 or 500 http code
 
 [recover]
 
 • recover data for email(s) user(s) email & msg in array object
+
 • decrypt the mongodb data
+
 • response with 200 or 500 http code
 
 [subscriber.js]
