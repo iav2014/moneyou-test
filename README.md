@@ -42,6 +42,7 @@ Server can handle 5000 to 25000 request/second depending your processor (i5 i7) 
 
 
 [send]
+
 • read data from user & encrypt data object
 • put a user email & msg into a rabbitmq queue
 • response with 200 or 500 http code
@@ -53,6 +54,7 @@ Server can handle 5000 to 25000 request/second depending your processor (i5 i7) 
 • response with 200 or 500 http code
 
 [subscriber.js]
+
 it is a rabbitmq consumer that receive a message from server queue and store it at mongodb
 and performs a email to user, using nodemailer.
 you can launch to many consumers if you need best perfomance.
@@ -98,6 +100,7 @@ It looks like this:
 }
 
 original object:
+
 {
         "_id": "5bc0c95c79f9679c13a69779",
         "email": "ignacio.ariza@gmail.com",
