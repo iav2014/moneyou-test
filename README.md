@@ -23,7 +23,7 @@ Software needed
 
 • You need a rabbitmq queue installed.
 
-• You need a mongodb v.3.5 database in replicaset mode (see url string connection) no user and pass needec
+• You need a mongodb v.3.5 database in replicaset mode (see url string connection) no user and pass needed
 
 • You need an account to nodemailer to send emails.
 
