@@ -8,6 +8,7 @@ var timeout = 10000;
 describe('#E2E send, server start  ', function () {
 	before(function (done) {
 		this.timeout(timeout);
+		server.startCluster();
 		setTimeout(function () {
 			done();
 		}, 5000);

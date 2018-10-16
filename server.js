@@ -1,9 +1,12 @@
 /**
  * Created by ariza on 10/2018.
+ * rabbitmq subscriber
+ * @goal: api rest(¿?) clustered express based, for learning use
+ * @author: Nacho Ariza 2018
  */
 const argv = require('optimist')
 	.usage('Usage: $0 --ip [public a.b.c.d] --http [port] --https [port]')
-	//.demand(['ip', 'http', 'https'])
+	//.demand(['ip', 'http', 'https']) // if you want mandatory fields
 	.argv;
 const _=argv;
 const amqp = require('amqplib/callback_api');
@@ -40,12 +43,13 @@ let config = {
 		}
 	}
 };
-argv.ip = argv.ip || '0.0.0.0';
+argv.ip = argv.ip || '0.0.0.0'; // assign default values...
 argv.http = argv.http || 3000;
 argv.https = argv.https || 3443;
+
 let startCluster = () => {
 	// server cluster section
-	if (cluster.isMaster) {
+	if (cluster.isMaster) { // using cluster module to balance http request...
 		let corr_id = []; // general array shared from all workers
 		console.log('isMaster');
 		for (let i = 0; i < cpuCount; i++) {
@@ -58,7 +62,7 @@ let startCluster = () => {
 			}
 			if (msg.topic && msg.topic === 'FIND') {
 				// here we increment the counter
-				var pos = corr_id.indexOf(msg.id);
+				let pos = corr_id.indexOf(msg.id);
 				if (pos >= 0) {
 					console.log('Confirmed');
 					corr_id.splice(pos, 1); // deleted id from array
@@ -69,7 +73,7 @@ let startCluster = () => {
 		console.log('slave');
 		let db = {};
 		let mongodbConnect = (dataConnect, callback) => {
-			mongo.connect(dataConnect.uri, dataConnect.options, function (err, dbs) {
+			mongo.connect(dataConnect.uri, dataConnect.options,  (err, dbs) => {
 				if (err) {
 					console.error(err);
 					return callback(err);
@@ -81,16 +85,17 @@ let startCluster = () => {
 				}
 			});
 		};
+		// encoder symmetric xor based example!
 		let encoder = (str) => {
 			var encoded = "";
-			for (var i = 0; i < str.length; i++) {
-				var a = str.charCodeAt(i);
-				var b = a ^ 377819129;
+			for (let i = 0; i < str.length; i++) {
+				let a = str.charCodeAt(i);
+				let b = a ^ 377819129;
 				encoded = encoded + String.fromCharCode(b);
 			}
 			return encoded;
 		};
-		// mongodb connect ...
+		// mongodb connect example ...
 		mongodbConnect(config.mongodb, (err, result) => {
 			if (err) {
 				console.error(err);
@@ -107,7 +112,7 @@ let startCluster = () => {
 			conn.createChannel((err, ch) => {
 				ch.assertQueue(config.rabbitmq.exchange, {durable: true}, (err, q) => {
 					console.log(' [x] Requesting process(%d)', process.pid);
-					ch.consume(q.queue, (msg) => {
+					ch.consume(q.queue, (msg) => { // listen receive ack...
 						console.log('GOT confirm ', process.pid, msg.properties.correlationId);
 						console.log('GOT processed:', process.pid, msg.content.toString());
 						process.send({topic: 'FIND', id: msg.properties.correlationId});
@@ -117,12 +122,13 @@ let startCluster = () => {
 				});
 			});
 		});
-		// aux functions  ...
+		//  generate random uid  ...
 		let generateUuid = () => {
 			return Math.random().toString() +
 				Math.random().toString() +
 				Math.random().toString();
-		}
+		};
+		// worker & process request
 		let taskPost = (req, res, callback) => {
 			let json = {};
 			req.query = req.body;
@@ -133,22 +139,23 @@ let startCluster = () => {
 			console.log('[%s] - (post/send)', ip);
 			json.email = encoder(req.query.email);
 			json.msg = encoder(req.query.msg);
-			let corr = generateUuid();
+			let corr = generateUuid(); // correlation uid
 			process.send({topic: 'ADD', id: corr});
 			console.log(process.pid, json);
 			console.log(process.pid, corr);
 			channel.sendToQueue(config.rabbitmq.queue,
 				new Buffer(JSON.stringify(json).toString()),
-				{correlationId: corr, replyTo: queue.queue});
+				{correlationId: corr, replyTo: queue.queue}); // put message at rabbitmq and release the request!
 			callback(null, 'put object in queue!');
 		};
+		// fin data at mongodb (create & using index by email field??)
 		let find = (data, callback) => {
 			db.collection('email', function (e, coll) {
 				console.log({email: encoder(data)})
 				coll.find({email: encoder(data)}).toArray((err, result) => {
 					if (result.length > 0) {
 						for (let i = 0; i < result.length; i++) {
-							result[i].email = encoder(result[i].email);
+							result[i].email = encoder(result[i].email); // decode document!
 							result[i].msg = encoder(result[i].msg);
 						}
 					}
@@ -156,12 +163,12 @@ let startCluster = () => {
 				});
 			});
 		}
-		// end aux functions
 		// put routes ...
 		app.use(bodyParser.json());        // to support JSON-encoded bodies
 		app.use(bodyParser.urlencoded({    // to support URL-encoded bodies
 			extended: true
 		}));
+		// send method
 		app.post('/send', (req, res, next) => {
 			taskPost(req, res, (err, result) => {
 				console.log(err || '[no error]', result);
@@ -172,13 +179,14 @@ let startCluster = () => {
 				}
 			});
 		});
+		// recover method
 		app.post('/recover', (req, res, next) => {
 			req.query = req.body;
 			let email = req.query.email;
 			find(email, (err, result) => {
 				if (err) {
 					console.error(err);
-					res.sendStatus(500);
+					res.sendStatus(500); // any error recover data from mongo
 				} else {
 					result.length == 0 ? res.sendStatus(204) : res.send(result);
 				}
@@ -209,9 +217,10 @@ let startCluster = () => {
 	}
 };
 
-if (_._.length===0){
+if (_._.length===0){ // start server if launch by command line params
 	startCluster();
 }
+module.exports.startCluster=startCluster;
 
 
 

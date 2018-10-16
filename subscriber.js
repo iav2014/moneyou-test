@@ -1,10 +1,14 @@
 /**
  * Created by ariza on 10/2018.
+ * rabbitmq subscriber
+ * @goal: scale & process user actions
+ * @author: Nacho Ariza 2018
  */
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // for nodemailer sec off
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // to avoid warning autogenerate certificates!
 const amqp = require('amqplib/callback_api');
 const mongo = require('mongodb');
 const nodemailer = require('nodemailer');
+// mongodb url data configuration
 let dataConnect = {
 	uri: "mongodb://localhost:27017,localhost:27018,localhost:27019/test?replicaSet=rs0",
 	options: {
@@ -37,32 +41,34 @@ mongodbConnect(dataConnect, (err, result) => {
 		db = result.db;
 	}
 });
-let encoder= (str)=> {
-	var encoded = "";
-	for (var i = 0; i < str.length; i++) {
-		var a = str.charCodeAt(i);
-		var b = a ^ 377819129;
-		//var b = a ^ 0x28;
+// encoder symmetric xor based example!
+let encoder = (str) => {
+	let encoded = "";
+	for (let i = 0; i < str.length; i++) {
+		let a = str.charCodeAt(i);
+		let b = a ^ 377819129;
 		encoded = encoded + String.fromCharCode(b);
 	}
 	return encoded;
 };
+// where is my rabbitmq?? try to connect to localhost rabbit.
+// if you want to connect to other rabbit, see rabbitmq documentation
 amqp.connect('amqp://localhost', (err, conn) => {
 	conn.createChannel(function (err, ch) {
 		let q = 'queue3';
 		ch.assertQueue(q, {durable: false});
 		ch.prefetch(1);
 		console.log(' [x] Awaiting RPC requests');
-		ch.consume(q, (msg) => {
-			var json = msg.content.toString();
+		ch.consume(q, (msg) => { // consumer listen
+			let json = msg.content.toString();
 			console.log(" [.] Get[.] - json:", json);
 			console.log('id:', msg.properties.correlationId);
 			console.log('response to:', msg.properties.replyTo);
 			//.. process.spawn python NLP
 			console.log('sending to nosql database ...');
 			console.log(json.toString());
-			let data=JSON.parse(json);
-			insertOne(data, (err, result) => {
+			let data = JSON.parse(json);
+			insertOne(data, (err, result) => { //saved data into mongodb
 				if (err) {
 					console.error(err);
 				} else {
@@ -71,8 +77,8 @@ amqp.connect('amqp://localhost', (err, conn) => {
 						new Buffer(json.toString()),
 						{correlationId: msg.properties.correlationId});
 					ch.ack(msg);
-					sendEmail(data,(err,result)=>{
-						if(err){
+					sendEmail(data, (err, result) => {
+						if (err) {
 							console.error(err);
 						} else {
 							console.log(result);
@@ -83,7 +89,7 @@ amqp.connect('amqp://localhost', (err, conn) => {
 		});
 	});
 });
-// mongodb functions
+// mongodb functions...
 let insertOne = (data, callback) => {
 	db.collection('email', function (e, coll) {
 		coll.insertOne(data, (err, result) => {
@@ -91,10 +97,10 @@ let insertOne = (data, callback) => {
 		});
 	});
 };
-// nodemailer sender
+// nodemailer sender ...
 let sendEmail = (data, callback) => {
 	// sending email
-	var transporter = nodemailer.createTransport({
+	let transporter = nodemailer.createTransport({
 		host: 'mail.xxx.com',
 		port: 465,
 		secure: true, // true for 465, false for other ports
@@ -103,13 +109,13 @@ let sendEmail = (data, callback) => {
 			pass: 'xxx' // replace by your-password
 		}
 	});
-	var mailOptions = {
+	let mailOptions = {
 		from: 'no-reply@xxx.com',
 		to: encoder(data.email),
 		subject: 'send sms',
 		html: '<p> this is your msg:</p><h1>' + encoder(data.msg) + '</h1>'
 	};
-	transporter.sendMail(mailOptions, function (error, info) {
+	transporter.sendMail(mailOptions, function (error, info) { // send email to user inbox...
 		if (error) {
 			console.error(error);
 			callback(null, info);
@@ -117,4 +123,4 @@ let sendEmail = (data, callback) => {
 		console.log('Email sent: ' + info.response);
 		callback(null, info.response);
 	})
-}
+};

@@ -3,6 +3,27 @@
 this source code consist of a  server & subscribe pattern
 This code is for option-2 document of moneyou.
 
+Reasons for the desing
+
+This architecture has been decided and not the lambda options of AWS, 
+thinking of making the code of the cloud provider independent.
+This code is part of a platform for mobile devices (second screen) and it has been 
+decided to eliminate proprietary technologies. 
+The lambda functions of AWS are slow to wake up around 200-900 ms, 
+during which time on the second screen platforms, a large number of devices are lost 
+on the stage of the beginning of a television program, where the first minutes of the 
+same is where the highest number of users of users is reached.
+For the same reason the AWS balancers need a preheating, and because of this, 
+it is proposed in case of balancing the rest service the use of a haproxy configured 
+in failover. 
+This architecture has been successfully tested in second screen events such as Masterchef
+Spain (2014-2017 editions) as well as Televisa Networks Mexico (login & logout editions) 
+as well as in different TV series on NBC Telemundo (señor de los cielos & señora acero ...)
+As part of the design of the second screen platform, you can consult the e2e user layer 
+based on sockets in my git. This type of e2e architectures allow asynchronous bidirectional 
+communication between users, also allowing the sending of events with the rabbitmq pattern.
+
+
 Architecture
 
 api server -> rabbitmqn-> [subscribers	1..n] -> mongodb + nodemailer					
