@@ -3,8 +3,6 @@
 this source code consist of a  server & subscribe pattern
 This code is for option-2 document of moneyou.
 
-Reasons for the desing
-
 Design Choices
  
 The architecture I used for this application has been chosen to make it work without any 
