@@ -8,7 +8,7 @@ const argv = require('optimist')
 	.usage('Usage: $0 --ip [public a.b.c.d] --http [port] --https [port]')
 	//.demand(['ip', 'http', 'https']) // if you want mandatory fields
 	.argv;
-const _=argv;
+const _ = argv;
 const amqp = require('amqplib/callback_api');
 const express = require('express');
 const app = express();
@@ -73,7 +73,7 @@ let startCluster = () => {
 		console.log('slave');
 		let db = {};
 		let mongodbConnect = (dataConnect, callback) => {
-			mongo.connect(dataConnect.uri, dataConnect.options,  (err, dbs) => {
+			mongo.connect(dataConnect.uri, dataConnect.options, (err, dbs) => {
 				if (err) {
 					console.error(err);
 					return callback(err);
@@ -162,14 +162,29 @@ let startCluster = () => {
 					callback(err, result);
 				});
 			});
-		}
+		};
+		// middleware token (management)
+		let token = (req, res, next) => {
+			req.query = req.body;
+			try {
+				let time = encoder(req.query.token);
+				if (new Date() / 1000 > time) {
+					res.sendStatus(403);
+				} else {
+					next();
+				}
+			} catch (err) {
+				res.sendStatus(500);
+			}
+		};
 		// put routes ...
 		app.use(bodyParser.json());        // to support JSON-encoded bodies
 		app.use(bodyParser.urlencoded({    // to support URL-encoded bodies
 			extended: true
 		}));
+		//app.use(token);
 		// send method
-		app.post('/send', (req, res, next) => {
+		app.post('/send', token, (req, res, next) => {
 			taskPost(req, res, (err, result) => {
 				console.log(err || '[no error]', result);
 				if (err) res.send(404);
@@ -180,7 +195,7 @@ let startCluster = () => {
 			});
 		});
 		// recover method
-		app.post('/recover', (req, res, next) => {
+		app.post('/recover', token, (req, res, next) => {
 			req.query = req.body;
 			let email = req.query.email;
 			find(email, (err, result) => {
@@ -192,9 +207,16 @@ let startCluster = () => {
 				}
 			})
 		});
-		app.use((req, res) => {
-			res.status(404);
-			res.send("route not exist");
+		// token method: generate valid token...
+		app.post('/token', (req, res, next) => {
+			req.query = req.body;
+			try {
+				let time = new Date() / 1000 + parseInt(req.query.keepalive || 60);
+				res.send(encoder(time.toString()));
+			} catch (err) {
+				//console.error(err);
+				res.sendStatus(404);
+			}
 		});
 		// end routes
 		// start the http & https servers ...
@@ -217,10 +239,10 @@ let startCluster = () => {
 	}
 };
 
-if (_._.length===0){ // start server if launch by command line params
+if (_._.length === 0) { // start server if launch by command line params
 	startCluster();
 }
-module.exports.startCluster=startCluster;
+module.exports.startCluster = startCluster;
 
 
 

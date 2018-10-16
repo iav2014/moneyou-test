@@ -34,12 +34,12 @@ describe('#E2E send, server start  ', function () {
 			}
 		});
 	});
-	it('#send - send a email message', function (done) {
+	it('#send - recover messages', function (done) {
 		this.timeout(timeout);
 		
-		var register = {"email":"ignacio.ariza@gmail.com","msg":"this is a test message","token":token};
+		var register = {"email":"ignacio.ariza@gmail.com","token":token};
 		var options = {
-			uri:url+'send',
+			uri:url+'recover',
 			json:register
 		};
 		request.post(options, function (err, result) {
@@ -55,11 +55,11 @@ describe('#E2E send, server start  ', function () {
 		});
 	});
 	
-	it('#send - send incomplete fields', function (done) {
+	it('#send - recover with incomplete fields, no token', function (done) {
 		this.timeout(timeout);
-		var register = {"email":"ignacio.ariza@gmail.com","token":token};
+		var register = {"email":"ignacio.ariza@gmail.com"};
 		var options = {
-			uri:url+'send',
+			uri:url+'recover',
 			json:register
 		};
 		request.post(options, function (err, result) {
