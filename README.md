@@ -5,23 +5,47 @@ This code is for option-2 document of moneyou.
 
 Reasons for the desing
 
-This architecture has been decided and not the lambda options of AWS, 
-thinking of making the code of the cloud provider independent.
-This code is part of a platform for mobile devices (second screen) and it has been 
-decided to eliminate proprietary technologies. 
-The lambda functions of AWS are slow to wake up around 200-900 ms, 
-during which time on the second screen platforms, a large number of devices are lost 
-on the stage of the beginning of a television program, where the first minutes of the 
-same is where the highest number of users of users is reached.
-For the same reason the AWS balancers need a preheating, and because of this, 
-it is proposed in case of balancing the rest service the use of a haproxy configured 
-in failover. 
-This architecture has been successfully tested in second screen events such as Masterchef
-Spain (2014-2017 editions) as well as Televisa Networks Mexico (login & logout editions) 
-as well as in different TV series on NBC Telemundo (señor de los cielos & señora acero ...)
-As part of the design of the second screen platform, you can consult the e2e user layer 
-based on sockets in my git. This type of e2e architectures allow asynchronous bidirectional 
-communication between users, also allowing the sending of events with the rabbitmq pattern.
+Design Choices
+ 
+The architecture I used for this application has been chosen to make it work without any 
+kind of cloud dependency. The code has been extracted from a mobile devices backend platform 
+where no proprietary technologies wanted to be used. This platform was a second screen 
+backend application. A second screen application is an accompanying mobile app of a TV show.
+I have chosen the technologies because the use case of the assignment seemed pretty similar 
+to this kind of platforms.
+ 
+I was also deciding whether to use a serverless AWS Lambda function architecture but in my 
+experience, Lambda functions are very slow to wake up. In my previous tests, I discovered 
+that AWS Lambdas took around 200ms-9000ms to wake up and start serving requests. 
+In second screen platforms, the ramp up of users is very sudden and steep and lot of requests
+start reaching to the backend at the beginning of the show. With Lambda functions, their wake
+up time will produce thousands of failed requests until the functions are able to respond to
+the load. I wanted to avoid this use case. I found the same problem with AWS balancers: 
+they need preheating and will lose requests at the very beginning of a sudden load.
+ 
+Because of these AWS limitations, I am proposing a highly scalable, independent architecture.
+The application has been designed from scratch to be able to scale horizontally, 
+sharing other instances, just prepending a light proxy before them (such as HAProxy).
+ 
+This architecture has been successfully implemented in a lot of production second screen
+applications, such as Masterchef Spain (2014-2017 editions), as well as Televisa Networks 
+Mexico (login & logout editions) and in a number of TV series on NBC Telemundo 
+(Señor de los Cielos, Señora Acero...).
+ 
+As you can check, I have other Github repositories where you can find more examples 
+of my work, specially the usage of a socket layer for direct server-device communication
+without the HTTP overhead. This type of architectures allow asynchronous bidirectional
+communication between users, also using RabbitMQ.
+
+socket.io based architecture:
+
+https://github.com/iav2014/server-socket
+
+api rest framework (services):
+
+https://github.com/iav2014/ponthos-framework
+
+
 
 
 Architecture
