@@ -1,5 +1,3 @@
-{
-  "name": "moneyou",
   "version": "1.0.0",
   "description": "moneyou test",
   "main": "server.js",
@@ -21,7 +19,7 @@
     "amqplib": "^0.5.2",
     "express": "^4.16.4",
     "minimist": "^1.2.5",
-    "mongodb": "^3.1.8",
+    "mongodb": ">=3.1.13",
     "nodemailer": "^4.6.8",
     "optimist": "^0.6.1",
     "request": "^2.88.0",
